@@ -1,6 +1,0 @@
-mu X (balance: Int := 0) . (
-(balance < 0) or
-<{updateDAO ?value:Int !"Attacker"}> X(balance - value) or
-<{succAdd !"Attacker" ?value:Int}> X(balance + value) or
-<not{updateDAO ?any of Int !"Attacker"} and not{succAdd !"Attacker" ?any of Int}> X(balance)
-)
