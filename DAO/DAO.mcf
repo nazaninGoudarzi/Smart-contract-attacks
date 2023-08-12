@@ -1,0 +1,10 @@
+mu X(balance:Int = 0).(
+	(val(balance < 0)) || 
+	(exists value:Int.(
+		<updateDAO(value,Attacker)> X(balance - value) || 
+		<succAdd(Attacker,value)> X(balance + value)) ||
+		(forall value2:Int.
+			<!updateDAO(value2,Attacker) && !succAdd(Attacker,value2)> X(balance)
+		)
+	)
+)
