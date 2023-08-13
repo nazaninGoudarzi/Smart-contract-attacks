@@ -1,0 +1,1 @@
+mu X.((<{originCheck ?s:String ?o:String ?w:String where ((s <> w) and (o = w))}> true) or (<true> X))

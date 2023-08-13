@@ -1,0 +1,1 @@
+mu X.((exists s,o,w:Address.<originCheck(s,o,w)>true && (val(s != w) && val(o == w))) || (<true> X))
