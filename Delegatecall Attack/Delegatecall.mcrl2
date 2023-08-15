@@ -32,27 +32,15 @@ eqn
 	ad1 == ad2 = equal(ad1,ad2);
 %-------------------------------------------------
 sort FunctionName;
-cons initWallet,execute,initMultiOwned : FunctionName;
+cons initWallet,execute : FunctionName;
 map
 	equalFunc : FunctionName#FunctionName -> Bool;
 var f1,f2: FunctionName;
 eqn
 	equalFunc(initWallet,initWallet) = true;
 	equalFunc(initWallet,execute) = false;
-	equalFunc(initWallet,initMultiOwned) = false;
-	equalFunc(initWallet,changeOwner) = false;
 	equalFunc(execute,execute) = true;
 	equalFunc(execute,initWallet) = false;
-	equalFunc(execute,initMultiOwned) = false;
-	equalFunc(execute,changeOwner) = false;
-	equalFunc(initMultiOwned,initMultiOwned) = true;
-	equalFunc(execute,initMultiOwned) = false;
-	equalFunc(initWallet,initMultiOwned) = false;
-	equalFunc(initWallet,changeOwner) = false;
-	equalFunc(changeOwner,changeOwner) = true;
-	equalFunc(execute,changeOwner) = false;
-	equalFunc(initWallet,changeOwner) = false;
-	equalFunc(initMultiOwned,changeOwner) = false;
 	f1 == f2 = equalFunc(f1,f2);
 %-------------------------------------------------
 sort Transaction;
@@ -96,7 +84,7 @@ act
 	call_succFallback,get_succFallback,succFallback;
 	call_failFallback,get_failFallback,failFallback;
 	call_delegatecall,get_delegatecall,delegatecall : Int#Int#Address#mapping#Int#FunctionName#Address#Int#Int
-		#Address#Address#Int#Nat#Address#Address;
+		#Address#Address#Int#Nat;
 	call_updateInitWallet,get_updateInitWallet,updateInitWallet : Int#Int#Address#mapping#Int;
 	call_succInitWallet,get_succInitWallet,succInitWallet;
 	call_failInitWallet,get_failInitWallet,failInitWallet;
@@ -114,11 +102,6 @@ act
 	update_owners,update_required,update_dailyLimit;
 	delegating;
 	call_selfdestruct,get_selfdestruct,selfdestruct : Int#Address;
-	call_initMultiOwned,get_initMultiOwned,init_MultiOwned : Int#Address#Int;
-	call_succInitMultiOwned,get_succInitMultiOwned,succInitMultiOwned;
-	call_failInitMultiOwned,get_failInitMultiOwned,failInitMultiOwned;
-	call_updateInitMultiOwned,get_updateInitMultiOwned,updateInitMultiOwned : Int#Address#mapping#Int;
-	call_changeOwner,get_changeOwner,change_Owner : Address#Address;
 	
 proc
 	harness(destructCounter:Int) =
@@ -131,22 +114,6 @@ proc
 							(get_succFallback + get_failFallback + get_succInitWallet + get_failInitWallet).
 							harness(destructCounter))
 						<> delta)
-					<> delta)
-				<> delta)
-			<> delta +
-			sum value:Int.(value >= 0 && value < 2) ->
-				(sum addr:Address.(addr == Normal || addr == Attacker) ->
-					(sum required:Int.(required == 1 || required == 2) ->
-						(call_initMultiOwned(value,addr,required).
-						(get_succFallback + get_failFallback + get_succInitMultiOwned + get_failInitMultiOwned).
-						harness(destructCounter))
-					<> delta)
-				<> delta)
-			<> delta +
-			sum value:Int.(value >= 0 && value < 2) ->
-				(sum fromAddr:Address.(fromAddr == Normal || fromAddr == Attacker || fromAddr == Owner) ->
-					(sum toAddr:Address.(toAddr == Normal || toAddr == Attacker || toAddr == Owner) ->
-						call_changeOwner(fromAddr,toAddr).
 					<> delta)
 				<> delta)
 			<> delta +
@@ -201,30 +168,24 @@ proc
 		sum value:Int.sum newOwner:Address.sum required:Int.sum daylimit:Int.
 			get_initWallet(value,newOwner,required,daylimit).
 				WalletFallback(m_required,m_dailyLimit,m_owners,m_txs,balance,
-				value,initWallet,newOwner,required,daylimit,null,null,0,2000,null,null) +
+				value,initWallet,newOwner,required,daylimit,null,null,0,2000) +
 		sum value:Int.sum senderAddr:Address.sum recvAddr:Address.sum amount:Int.sum hashIndex:Nat.
 			get_execute(value,senderAddr,recvAddr,amount,hashIndex).
 				WalletFallback(m_required,m_dailyLimit,m_owners,m_txs,balance,
-				value,execute,null,0,0,senderAddr,recvAddr,amount,hashIndex,null,null) +
-		sum value:Int.sum newOwner:Address.sum required:Int.get_initMultiOwned(value,newOwner,required).
-			WalletFallback(m_required,m_dailyLimit,m_owners,m_txs,balance,
-			value,initMultiOwned,newOwner,required,0,null,null,0,2000,null,null) +
-		sum fromAddr:Address.sum toAddr:Address.get_changeOwner(fromAddr,toAddr).
-			WalletFallback(m_required,m_dailyLimit,m_owners,m_txs,balance,
-			value,changeOwner,newOwner,required,0,null,null,0,2000,fromAddr,toAddr) +
+				value,execute,null,0,0,senderAddr,recvAddr,amount,hashIndex) +
 		sum value:Int.sum addr:Address.get_selfdestruct(value,addr).
 			Wallet(m_required,m_dailyLimit,m_owners,m_txs,balance + value);
 			
 	WalletFallback(m_required:Int,m_dailyLimit:Int,m_owners:Address,m_txs:mapping,balance:Int,
 	value:Int,name:FunctionName,newOwner:Address,required:Int,daylimit:Int,
-	senderAddr:Address,recvAddr:Address,amount:Int,hashIndex:Nat,fromAddr:Address,toAddr:Address) =
+	senderAddr:Address,recvAddr:Address,amount:Int,hashIndex:Nat) =
 		(balance < 155 && balance >= 150) ->
 			((value > 0) ->
 				call_succFallback.
 				Wallet(m_required,m_dailyLimit,m_owners,m_txs,balance + value)
 			<> (value == 0) -> delegating.
 				call_delegatecall(m_required,m_dailyLimit,m_owners,m_txs,balance,
-				name,newOwner,required,daylimit,senderAddr,recvAddr,amount,hashIndex,fromAddr,toAddr).
+				name,newOwner,required,daylimit,senderAddr,recvAddr,amount,hashIndex).
 				((name == initWallet) ->
 					sum i_required:Int.sum i_dailyLimit:Int.sum i_owners:Address.sum i_txs:mapping.sum i_balance:Int.
 					get_updateInitWallet(i_required,i_dailyLimit,i_owners,i_txs,i_balance).
@@ -249,18 +210,6 @@ proc
 					(sum i_txs:mapping.get_updateTransactionExecute(i_txs).call_succExecute.
 						Wallet(m_required,m_dailyLimit,m_owners,i_txs,balance)) +
 					(get_succLibraryExecute.Wallet(m_required,m_dailyLimit,m_owners,m_txs,balance)))
-				<> (name == initMultiOwned) ->
-					sum i_required:Int.sum i_owners:Address.sum i_txs:mapping.sum i_balance:Int.
-					get_updateInitMultiOwned(i_required,i_owners,i_txs,i_balance).
-					((i_owners == m_owners) -> 
-						call_succInitMultiOwned.
-						Wallet(i_required,m_dailyLimit,i_owners,i_txs,i_balance)
-					<> update_owners.update_required.call_succInitMultiOwned.
-						Wallet(i_required,m_dailyLimit,i_owners,i_txs,i_balance))
-				<> (name == changeOwner) ->
-					(sum i_toAddr:Address.sum i_txs:mapping.call_updateChangeOwner(i_toAddr,i_txs).
-					Wallet+
-					
 				<> delta)
 			<> delta)
 		<> delta;
@@ -269,20 +218,13 @@ proc
 		sum m_required:Int.sum m_dailyLimit:Int.sum m_owners:Address.sum m_txs:mapping.sum balance:Int.
 		sum name:FunctionName.sum newOwner:Address.sum required:Int.sum daylimit:Int.
 		sum senderAddr:Address.sum recvAddr:Address.sum amount:Int.sum hashIndex:Nat.
-		sum fromAddr:Address.sum toAddr:Address.
 		get_delegatecall(m_required,m_dailyLimit,m_owners,m_txs,balance,name,newOwner,required,daylimit,
-			senderAddr,recvAddr,amount,hashIndex,fromAddr,toAddr).
+			senderAddr,recvAddr,amount,hashIndex).
 		(name == initWallet) ->
 			LibraryInitWallet(m_required,m_dailyLimit,m_owners,m_txs,balance,newOwner,required,daylimit).
 			WalletLibrary
 		<> (name == execute) ->
 			LibraryExecute(m_required,m_dailyLimit,m_owners,m_txs,balance,senderAddr,recvAddr,amount,hashIndex).
-			WalletLibrary
-		<> (name == initMultiOwned) ->
-			LibraryInitMultiOwned(m_required,m_dailyLimit,m_owners,m_txs,balance,newOwner,required).
-			WalletLibrary
-		<> (name == changeOwner) ->
-			LibraryChangeOwner(m_required,m_dailyLimit,m_owners,m_txs,balance,fromAddr,toAddr).
 			WalletLibrary
 		<> delta;
 		
@@ -303,16 +245,6 @@ proc
 					(call_updateTransactionExecute(addMapping(hashIndex,addTranaction(recvAddr,amount),m_txs)))
 			<> call_succLibraryExecute)
 		<> call_failLibraryExecute;
-		
-	LibraryInitMultiOwned(m_required:Int,m_dailyLimit:Int,m_owners:Address,m_txs:mapping,balance:Int,
-	newOwner:Address,required:Int) =
-		call_updateInitMultiOwned(required,newOwner,m_txs,balance);
-		
-	LibraryChangeOwner(m_required:Int,m_dailyLimit:Int,m_owners:Address,m_txs:mapping,balance:Int,fromAddr:Address,
-	toAddr:Address) =
-		sum isOwner:Bool.(isOwner) ->
-			clearPending.call_updateChangeOwner(toAddr,emptyMapping)
-		<> call_failLibraryChangeOwner;
 		
 	AttackerContract(addr:Address,i:Int,eta:Int,destructCounter:Int) =
 		(i < eta) ->
@@ -343,8 +275,7 @@ init
 		init_Wallet,succFallback,failFallback,delegatecall,updateInitWallet,succInitWallet,failInitWallet,_execute,
 		failLibraryExecute,succLibraryExecute,succExecuteWithFallback,succExecute,failExecute,updateTransferExecute,
 		updateTransactionExecute,transfer_EmptyFallback,transfer_NoFallback,transfer_Fallback,update_owners,
-		update_required,update_dailyLimit,delegating,selfdestruct,init_MultiOwned,succInitMultiOwned,failInitMultiOwned,
-		updateInitMultiOwned
+		update_required,update_dailyLimit,delegating,selfdestruct
 	},
 		comm({
 			call_initWallet|get_initWallet -> init_Wallet,
@@ -365,11 +296,7 @@ init
 			call_transfer_EmptyFallback|get_transfer_EmptyFallback -> transfer_EmptyFallback,
 			call_transfer_NoFallback|get_transfer_NoFallback -> transfer_NoFallback,
 			call_transfer_Fallback|get_transfer_Fallback -> transfer_Fallback,
-			call_selfdestruct|get_selfdestruct -> selfdestruct,
-			call_initMultiOwned|get_initMultiOwned -> init_MultiOwned,
-			call_succInitMultiOwned|get_succInitMultiOwned -> succInitMultiOwned,
-			call_failInitMultiOwned|get_failInitMultiOwned -> failInitMultiOwned,
-			call_updateInitMultiOwned|get_updateInitMultiOwned -> updateInitMultiOwned
+			call_selfdestruct|get_selfdestruct -> selfdestruct
 		},
 		harness(0) || 
 		Wallet(1,50,Normal,addMapping(1,addTranaction(Normal,10),emptyMapping),150) ||
