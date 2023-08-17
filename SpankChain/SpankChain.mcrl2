@@ -1,0 +1,352 @@
+sort Address;
+cons Normal,Attacker,Owner,null,Contract : Address;
+map
+	equal : Address#Address -> Bool;
+var ad1,ad2: Address;
+eqn
+	equal(Normal,Normal) = true;
+	equal(Normal,Attacker) = false;
+	equal(Normal,Owner) = false;
+	equal(Normal,null) = false;
+	equal(Normal,Contract) = false;
+	equal(Attacker,Attacker) = true;
+	equal(Attacker,Normal) = false;
+	equal(Attacker,Owner) = false;
+	equal(Attacker,null) = false;
+	equal(Attacker,Contract) = false;
+	equal(Owner,Owner) = true;
+	equal(Owner,Normal) = false;
+	equal(Owner,Attacker) = false;
+	equal(Owner,null) = false;
+	equal(Owner,Contract) = false;
+	equal(null,null) = true;
+	equal(null,Normal) = false;
+	equal(null,Attacker) = false;
+	equal(null,Owner) = false;
+	equal(null,Contract) = false;
+	equal(Contract,Contract) = true;
+	equal(Contract,Normal) = false;
+	equal(Contract,Attacker) = false;
+	equal(Contract,Owner) = false;
+	equal(Contract,null) = false;
+	ad1 == ad2 = equal(ad1,ad2);
+%-------------------------------------------------
+sort Channel;
+cons empChannel : Channel;
+	 addChannel : Address#Address#Int#Int#Int#Int#Int#Int#Int#Nat#Int#Int#Bool#Bool#Int -> Channel;
+map	 
+	 getParty0 : Channel -> Address;
+	 getParty1 : Channel -> Address;
+	 getCethBalances0 : Channel -> Int;
+	 getCethBalances1 : Channel -> Int;
+	 getCethBalances2 : Channel -> Int;
+	 getCethBalances3 : Channel -> Int;
+	 getInitialDeposit0 : Channel -> Int;
+	 getSequence : Channel -> Int;
+	 getConfirmTime : Channel -> Int;
+	 getVCrootHash : Channel -> Nat;
+	 getLCopenTimeout : Channel -> Int;
+	 getUpdateLCtimeout : Channel -> Int;
+	 getIsOpen : Channel -> Bool;
+	 getIsUpdateLCSettling : Channel -> Bool;
+	 getNumOpenVC : Channel -> Int;
+var
+	a1,a2 : Address;
+	bA,bI,dA,dI,e,s,cT,LC,ULC,num : Int;
+	VC : Nat;
+	iO,IsU : Bool;
+eqn
+	getParty0(empChannel) = null;
+	getParty0(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = a1;
+	getParty1(empChannel) = null;
+	getParty1(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = a2;
+	getCethBalances0(empChannel) = -2;
+	getCethBalances0(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = bA;
+	getCethBalances1(empChannel) = -2;
+	getCethBalances1(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = bI;
+	getCethBalances2(empChannel) = -2;
+	getCethBalances2(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = dA;
+	getCethBalances3(empChannel) = -2;
+	getCethBalances3(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = dI;
+	getInitialDeposit0(empChannel) = -2;
+	getInitialDeposit0(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = e;
+	getSequence(empChannel) = -2;
+	getSequence(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = s;
+	getConfirmTime(empChannel) = -2;
+	getConfirmTime(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = cT;
+	getVCrootHash(empChannel) = 0;
+	getVCrootHash(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = VC;
+	getLCopenTimeout(empChannel) = -2;
+	getLCopenTimeout(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = LC;
+	getUpdateLCtimeout(empChannel) = -2;
+	getUpdateLCtimeout(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = ULC;
+	getIsOpen(empChannel) = false;
+	getIsOpen(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = iO;
+	getIsUpdateLCSettling(empChannel) = false;
+	getIsUpdateLCSettling(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = IsU;
+	getNumOpenVC(empChannel) = -2;
+	getNumOpenVC(addChannel(a1,a2,bA,bI,dA,dI,e,s,cT,VC,LC,ULC,iO,IsU,num)) = num;
+%-------------------------------------------------	 
+sort mChannel;
+cons emptyMchannel : mChannel;
+	 addMchannel : Nat#Channel#mChannel -> mChannel;
+map
+	retValueChannel : Nat#mChannel -> Channel;
+	searchChannel : Nat#mChannel -> Bool;
+	updateChannel: Nat#Channel#mChannel -> mChannel;
+var
+	array : mChannel;
+	b,d : Channel;
+	a,c : Nat;
+eqn
+	retValueChannel(a,emptyMchannel) = empChannel;
+	retValueChannel(a,addMchannel(c,b,array)) = if(a == c,b,retValueChannel(a,array));
+	searchChannel(a,emptyMchannel) = false;
+	searchChannel(a,addMchannel(c,b,array)) = if(a == c,true,searchChannel(a,array));
+	updateChannel(a,b,emptyMchannel) = emptyMchannel;
+	updateChannel(a,b,addMchannel(c,d,array)) = 
+		if(a == c,addMchannel(a,b,array),addMchannel(c,d,updateChannel(a,b,array)));
+%-------------------------------------------------
+sort VChannel;
+cons empVChannel : VChannel;
+	 addVChannel : Bool#Bool#Int#Address#Address#Int#Int#Int#Int -> VChannel;
+map	 
+	 getIsClose : VChannel -> Bool;
+	 getIsInSettlementState : VChannel -> Bool;
+	 getUpdateVCtimeout : VChannel -> Int;
+	 getPartyA : VChannel -> Address;
+	 getPartyB : VChannel -> Address;
+	 getVCetherBalances0 : VChannel -> Int;
+	 getVCetherBalances1 : VChannel -> Int;
+var
+	a1,a2 : Address;
+	UVC,e0,e1,b0,b1 : Int;
+	iC,iIS : Bool;
+eqn
+	getIsClose(empVChannel) = false;
+	getIsClose(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = iC;
+	getIsInSettlementState(empVChannel) = false;
+	getIsInSettlementState(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = iIS;
+	getUpdateVCtimeout(empVChannel) = -2;
+	getUpdateVCtimeout(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = UVC;
+	getPartyA(empVChannel) = null;
+	getPartyA(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = a1;
+	getPartyB(empVChannel) = null;
+	getPartyB(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = a2;
+	getVCetherBalances0(empVChannel) = -2;
+	getVCetherBalances0(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = e0;
+	getVCetherBalances1(empVChannel) = -2;
+	getVCetherBalances1(addVChannel(iC,iIS,UVC,a1,a2,e0,e1,b0,b1)) = e1;
+%-------------------------------------------------	 
+sort mVChannel;
+cons emptyMVchannel : mVChannel;
+	 addMVchannel : Nat#VChannel#mVChannel -> mVChannel;
+map
+	retValueVChannel : Nat#mVChannel -> VChannel;
+	searchVChannel : Nat#mVChannel -> Bool;
+	updateVChannel: Nat#VChannel#mVChannel -> mVChannel;
+var
+	array : mVChannel;
+	b,d : VChannel;
+	a,c : Nat;
+eqn
+	retValueVChannel(a,emptyMVchannel) = empVChannel;
+	retValueVChannel(a,addMVchannel(c,b,array)) = if(a == c,b,retValueVChannel(a,array));
+	searchVChannel(a,emptyMVchannel) = false;
+	searchVChannel(a,addMVchannel(c,b,array)) = if(a == c,true,searchVChannel(a,array));
+	updateVChannel(a,b,emptyMVchannel) = emptyMVchannel;
+	updateVChannel(a,b,addMVchannel(c,d,array)) = 
+		if(a == c,addMVchannel(a,b,array),addMVchannel(c,d,updateVChannel(a,b,array)));
+%-------------------------------------------------
+act
+	call_createChannel,get_createChannel,create_Channel : Nat#Address#Int#Int#Int#Address;
+	create_firstSuccess,create_firstFail;
+	create_secondSuccess,create_secondFail;
+	create_thirdSuccess,create_thirdFail;
+	create_forthSuccess,create_forthFail;
+	create_fifthSuccess,create_fifthFail;
+	call_succCreate,get_succCreate,succCreate : Int;
+	call_failCreate,get_failCreate,failCreate;
+	call_LCOpenTimeout,get_LCOpenTimeout,LCOpen_Timeout : Nat#Address;
+	call_succLCOpen,get_succLCOpen,succLCOpen;
+	call_failLCOpen,get_failLCOpen,failLCOpen;
+	call_transfer_EmptyFallback,get_transfer_EmptyFallback,transfer_EmptyFallback : Address;
+	call_transfer_NoFallback,get_transfer_NoFallback,transfer_NoFallback : Address;
+	call_transfer_Fallback,get_transfer_Fallback,transfer_Fallback : Address#Int;
+	call_updateLedgerChannel,get_updateLedgerChannel,updateLedgerChannel : Nat#Int;
+	call_LedgerChannel,get_LedgerChannel,editLedgerChannel;
+	LCOpen_firstSuccess,LCOpen_firstFail;
+	LCOpen_secondSuccess,LCOpen_secondFail;
+	LCOpen_thirdSuccess,LCOpen_thirdFail;
+	updateChannelETH : Int;
+	call_selfdestruct,get_selfdestruct,selfdestruct : Int#Address;
+proc
+	harness(destructCounter:Int) =
+		(destructCounter == 0) ->
+			((sum lcID:Nat.(lcID == 1 || lcID == 2) ->
+				(sum partyI:Address.(partyI == Normal || partyI == Attacker || partyI == null) ->
+					(sum confirmTime:Int.(confirmTime >= 0 && confirmTime < 2) ->
+						(sum ether:Int.(ether == -1 || ether == 0 || ether == 5) ->
+							(sum value:Int.(value == 5 || value == 7) ->
+								(sum addr:Address.(addr == Normal || addr == Attacker) ->
+									(call_createChannel(lcID,partyI,confirmTime,ether,value,addr).
+									(get_succCreate(ether) + get_failCreate).harness(destructCounter))
+								<> delta)
+							<> delta)
+						<> delta)
+					<> delta)
+				<> delta)
+			<> delta) +
+			(sum lcID:Nat.(lcID == 1 || lcID == 2) ->
+				(sum addr:Address.(addr == Normal || addr == Attacker) ->
+					(call_LCOpenTimeout(lcID,addr).
+					(((addr == Normal) ->
+						(get_transfer_EmptyFallback(addr).get_succLCOpen).harness(destructCounter)
+					<> (addr == Attacker) ->
+						((get_transfer_NoFallback(addr).get_succLCOpen) +
+						(sum value:Int.get_transfer_Fallback(addr,value).AttackerContract(addr,1,2,lcID,value).
+						(get_succLCOpen + get_failLCOpen))).harness(destructCounter)
+					<> delta) +
+					(get_failLCOpen.harness(destructCounter))))
+				<> delta)
+			<> delta) +
+			sum value:Int.(value == 10 || value == 40 || value == 60) -> 
+				(sum addr:Address.(addr == Contract) ->
+					(call_selfdestruct(value,Contract).harness(destructCounter + 1))
+				<> delta)
+			<> delta)
+		<> (destructCounter == 1) ->
+			((sum lcID:Nat.(lcID == 1 || lcID == 2) ->
+				(sum partyI:Address.(partyI == Normal || partyI == Attacker || partyI == null) ->
+					(sum confirmTime:Int.(confirmTime >= 0 && confirmTime < 2) ->
+						(sum ether:Int.(ether == -1 || ether == 0 || ether == 5) ->
+							(sum value:Int.(value == 5 || value == 7) ->
+								(sum addr:Address.(addr == Normal || addr == Attacker) ->
+									(call_createChannel(lcID,partyI,confirmTime,ether,value,addr).
+									(get_succCreate(ether) + get_failCreate).harness(destructCounter))
+								<> delta)
+							<> delta)
+						<> delta)
+					<> delta)
+				<> delta)
+			<> delta) +
+			(sum lcID:Nat.(lcID == 1 || lcID == 2) ->
+				(sum addr:Address.(addr == Normal || addr == Attacker) ->
+					(call_LCOpenTimeout(lcID,addr).
+					(((addr == Normal) ->
+						(get_transfer_EmptyFallback(addr).get_succLCOpen).harness(destructCounter)
+					<> (addr == Attacker) ->
+						((get_transfer_NoFallback(addr).get_succLCOpen) +
+						(sum value:Int.get_transfer_Fallback(addr,value).AttackerContract(addr,1,2,lcID,value).
+						(get_succLCOpen + get_failLCOpen))).harness(destructCounter)
+					<> delta) +
+					(get_failLCOpen.harness(destructCounter))))
+				<> delta)
+			<> delta));
+	
+	% The balance is only consider the ether balance of LedgerChannel contract
+	LedgerChannel(Channels:mChannel,virtualChannels:VChannel,numChannels:Int,balance:Int) =
+		sum lcID:Nat.sum partyI:Address.sum confirmTime:Int.sum ether:Int.sum value:Int.sum addr:Address.
+			get_createChannel(lcID,partyI,confirmTime,ether,value,addr).
+			createChannel(Channels,virtualChannels,numChannels,balance,lcID,partyI,confirmTime,ether,value,addr)+
+		sum lcID:Nat.sum addr:Address.get_LCOpenTimeout(lcID,addr).
+			LCOpenTimeout(Channels,virtualChannels,numChannels,balance,lcID,addr) +
+		sum lcID:Nat.sum value:Int.get_updateLedgerChannel(lcID,value).
+			updateChannelETH(value).
+			LedgerChannel(updateChannel(lcID,addChannel(null,null,0,0,0,0,0,0,0,0,0,0,false,false,0),Channels),
+			virtualChannels,numChannels,balance - value) +
+		sum value:Int.sum addr:Address.get_selfdestruct(value,addr).
+			LedgerChannel(Channels,virtualChannels,numChannels,balance + value);
+			
+	createChannel(Channels:mChannel,virtualChannels:VChannel,numChannels:Int,balance:Int,lcID:Nat,partyI:Address,
+	confirmTime:Int,ether:Int,value:Int,addr:Address) =
+		(balance < 10 && balance >= 0) ->
+			((searchChannel(lcID,Channels) == false) ->
+				(create_firstSuccess.
+				(!(partyI == null)) ->
+					(create_secondSuccess.
+					(ether >= 0) ->
+						(create_thirdSuccess.
+						(ether != 0) ->
+							((value == ether) ->
+								(create_forthSuccess.call_succCreate(ether).
+									LedgerChannel(addMchannel(lcID,addChannel(addr,partyI,value,0,0,0,
+									ether,0,confirmTime,0,confirmTime + 2,1,false,false,0),Channels),
+									virtualChannels,numChannels,balance + ether))
+							<> create_forthFail.call_failCreate.
+								LedgerChannel(Channels,virtualChannels,numChannels,balance))
+						<> call_succCreate(value).
+							LedgerChannel(addMchannel(lcID,addChannel(addr,partyI,ether,0,0,0,
+							ether,0,confirmTime,0,confirmTime + 2,1,false,false,0),Channels),
+							virtualChannels,numChannels,balance + value))
+					<> create_thirdFail.call_failCreate.LedgerChannel(Channels,virtualChannels,numChannels,balance))
+				<> create_secondFail.call_failCreate.LedgerChannel(Channels,virtualChannels,numChannels,balance))
+			<> create_firstFail.call_failCreate.LedgerChannel(Channels,virtualChannels,numChannels,balance))
+		<> call_failCreate.LedgerChannel(Channels,virtualChannels,numChannels,balance);
+	LCOpenTimeout(Channels:mChannel,virtualChannels:VChannel,numChannels:Int,balance:Int,lcID:Nat,addr:Address) =
+		(searchChannel(lcID,Channels) == true) ->
+			((addr == getParty0(retValueChannel(lcID,Channels)) && getIsOpen(retValueChannel(lcID,Channels)) == false)->
+				(LCOpen_firstSuccess.
+				(LCOpen_secondSuccess.
+				(getInitialDeposit0(retValueChannel(lcID,Channels)) != 0) ->
+					((call_transfer_EmptyFallback(addr).call_succLCOpen.LedgerChannel(updateChannel(lcID,
+						addChannel(null,null,0,0,0,0,0,0,0,0,0,0,false,false,0),Channels),
+						virtualChannels,numChannels,balance - getCethBalances0(retValueChannel(lcID,Channels)))) +
+					(call_transfer_NoFallback(addr).call_succLCOpen.LedgerChannel(updateChannel(lcID,
+						addChannel(null,null,0,0,0,0,0,0,0,0,0,0,false,false,0),Channels),
+						virtualChannels,numChannels,balance)) +
+					(call_transfer_Fallback(addr,getCethBalances0(retValueChannel(lcID,Channels))).
+						LedgerChannel(Channels,virtualChannels,numChannels,
+						balance - getCethBalances0(retValueChannel(lcID,Channels)))))
+				<> call_succLCOpen.LedgerChannel(updateChannel(lcID,
+						addChannel(null,null,0,0,0,0,0,0,0,0,0,0,false,false,0),Channels),
+						virtualChannels,numChannels,balance)) +
+				(LCOpen_secondFail.call_failLCOpen.LedgerChannel(Channels,virtualChannels,numChannels,balance)))
+			<> LCOpen_firstFail.call_failLCOpen.LedgerChannel(Channels,virtualChannels,numChannels,balance))
+		<> LCOpen_firstFail.call_failLCOpen.LedgerChannel(Channels,virtualChannels,numChannels,balance);
+		
+	AttackerContract(addr:Address,i:Int,eta:Nat,lcID:Nat,value:Int) =
+		(i < eta) ->
+			((sum NewlcID:Nat.(NewlcID == 1 || NewlcID == 2) ->
+				(sum partyI:Address.(partyI == Normal || partyI == Attacker || partyI == null) ->
+					(sum confirmTime:Int.(confirmTime >= 0 && confirmTime < 2) ->
+						(sum ether:Int.(ether == -1 || ether == 0 || ether == 5) ->
+							(sum amount:Int.(amount == 5 || amount == 7) ->
+								call_createChannel(NewlcID,partyI,confirmTime,ether,amount,addr).
+								(get_succCreate(ether) + get_failCreate).AttackerContract(addr,i + 1,eta,lcID,value)
+							<> delta)
+						<> delta)
+					<> delta)
+				<> delta)
+			<> delta) +
+			(call_LCOpenTimeout(lcID,addr).
+				((sum value2:Int.get_transfer_Fallback(addr,value2).AttackerContract(addr,i + 1,eta,lcID,value).
+					ContinuationLCOpen(lcID,value2)) +
+				(get_failLCOpen.AttackerContract(addr,i + 1,eta,lcID,value)))))
+		<> ContinuationLCOpen(lcID,value);
+	
+	ContinuationLCOpen(lcID:Nat,value:Int) =
+		call_updateLedgerChannel(lcID,value);
+init
+	allow({
+		create_Channel,create_firstSuccess,create_firstFail,create_secondSuccess,create_secondFail,create_thirdSuccess,
+		create_thirdFail,create_forthSuccess,create_forthFail,create_fifthSuccess,create_fifthFail,succCreate,
+		failCreate,LCOpen_Timeout,succLCOpen,failLCOpen,transfer_EmptyFallback,transfer_NoFallback,transfer_Fallback,
+		updateLedgerChannel,editLedgerChannel,LCOpen_firstSuccess,LCOpen_firstFail,LCOpen_secondSuccess,
+		LCOpen_secondFail,LCOpen_thirdSuccess,LCOpen_thirdFail,updateChannelETH,selfdestruct
+	},
+		comm({
+			call_createChannel|get_createChannel -> create_Channel,
+			call_succCreate|get_succCreate -> succCreate,
+			call_failCreate|get_failCreate -> failCreate,
+			call_LCOpenTimeout|get_LCOpenTimeout -> LCOpen_Timeout,
+			call_succLCOpen|get_succLCOpen -> succLCOpen,
+			call_failLCOpen|get_failLCOpen -> failLCOpen,
+			call_transfer_EmptyFallback|get_transfer_EmptyFallback -> transfer_EmptyFallback,
+			call_transfer_NoFallback|get_transfer_NoFallback -> transfer_NoFallback,
+			call_transfer_Fallback|get_transfer_Fallback -> transfer_Fallback,
+			call_updateLedgerChannel|get_updateLedgerChannel -> updateLedgerChannel,
+			call_LedgerChannel|get_LedgerChannel -> editLedgerChannel,
+			call_selfdestruct|get_selfdestruct -> selfdestruct
+		},
+			harness(0) || LedgerChannel(emptyMchannel,empVChannel,0,0)));

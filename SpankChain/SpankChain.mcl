@@ -1,0 +1,6 @@
+mu X (balance: Int := 0) . (
+(balance < 0) or
+<{updateChannelETH ?value:Int}> X(balance - value) or
+<{succCreate ?value:Int}> X(balance + value) or
+<not{updateChannelETH ?any of Int} and not{succCreate ?any of Int}> X(balance)
+)

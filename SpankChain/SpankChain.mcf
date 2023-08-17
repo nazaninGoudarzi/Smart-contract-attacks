@@ -1,0 +1,10 @@
+mu X(balance:Int = 0).(
+	(val(balance < 0)) || 
+	(exists value:Int.(
+		<updateChannelETH(value)> X(balance - value) || 
+		<succCreate(value)> X(balance + value)) ||
+		(forall amount:Int.
+			<!updateChannelETH(amount) && !succCreate(amount)> X(balance)
+		)
+	)
+)
